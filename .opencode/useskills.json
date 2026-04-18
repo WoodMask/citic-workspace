@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "profiles": {
+    "default": {
+      "skills": ["serpapi-search", "tavily-search", "xlsx", "gh-cli"],
+      "description": "默认配置：搜索+表格+GitHub操作"
+    },
+    "report": {
+      "skills": ["open-source-tech-report", "xlsx", "serpapi-search"],
+      "description": "报告模式：技术评估报告+表格+搜索"
+    },
+    "coding": {
+      "skills": ["serpapi-search", "tavily-search", "gh-cli", "skill-creator"],
+      "description": "编码模式：搜索+GitHub+技能创建"
+    },
+    "agent": {
+      "skills": ["proactive-agent", "self-improving-agent", "remembering-conversations"],
+      "description": "Agent模式：主动代理+自改进+记忆"
+    }
+  },
+  "activeProfile": "default",
+  "autoLoad": true,
+  "projectSkills": ["useskills", "serpapi-search", "open-source-tech-report", "send-citic-mail"]
+}

@@ -1,0 +1,8 @@
+{
+  "sender": "maskmagician@qq.com",
+  "receiver": "wusinan_kzx@citicbank.com",
+  "auth_code": "ayfjlptifvqvbgbf",
+  "smtp_server": "smtp.qq.com",
+  "smtp_port": 465,
+  "default_subject": "工作文件发送"
+}
