@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模型推理服务工作看板</title>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1800px; margin: 0 auto; }
+        
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 28px;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-date {
+            font-size: 16px;
+            color: #6b7280;
+        }
+        
+        .progress-section {
+            margin-bottom: 20px;
+        }
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #4b5563;
+        }
+        .progress-bar {
+            height: 24px;
+            background: #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            border-radius: 12px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 12px;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .stat-card {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        .stat-card.completed .stat-value { color: #10b981; }
+        .stat-card.progress .stat-value { color: #3b82f6; }
+        .stat-card.pending .stat-value { color: #6b7280; }
+        .stat-card.warning .stat-value { color: #ef4444; }
+        
+        .warnings {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+        .warnings h3 {
+            color: #dc2626;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        .warning-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid #fecaca;
+            font-size: 14px;
+        }
+        .warning-item:last-child { border-bottom: none; }
+        .warning-badge {
+            background: #dc2626;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .kanban {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        
+        .category {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .category-header {
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .category-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .category-progress {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+        .category-progress-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .category-progress-fill {
+            height: 100%;
+            background: white;
+            border-radius: 3px;
+        }
+        
+        .tasks {
+            padding: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .task {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid #6b7280;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .task:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .task.completed { border-left-color: #10b981; background: #f0fdf4; }
+        .task.progress { border-left-color: #3b82f6; background: #eff6ff; }
+        .task.pending { border-left-color: #6b7280; }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        .task-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1f2937;
+            flex: 1;
+            margin-right: 8px;
+        }
+        .task-row {
+            color: #667eea;
+            font-weight: bold;
+        }
+        .task-status {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            flex-shrink: 0;
+        }
+        .task-status.completed { background: #10b981; }
+        .task-status.progress { background: #3b82f6; }
+        .task-status.pending { background: #6b7280; }
+        
+        .task-dates {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+        .task-note {
+            font-size: 12px;
+            color: #9ca3af;
+            line-height: 1.4;
+        }
+        
+        .task.overdue {
+            border: 2px solid #ef4444;
+            background: #fef2f2;
+        }
+        .task.warning-soon {
+            border: 2px solid #f59e0b;
+            background: #fffbeb;
+        }
+        .date-warning {
+            font-size: 11px;
+            color: #dc2626;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+        
+        .milestones-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .milestones-section h2 {
+            font-size: 20px;
+            color: #1f2937;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .milestones-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 12px;
+        }
+        .milestone {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 4px solid #f59e0b;
+        }
+        .milestone.completed {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left-color: #10b981;
+        }
+        .milestone-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .milestone-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1f2937;
+        }
+        .milestone-dates {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+        }
+        
+        .filter-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .filter-label {
+            font-size: 14px;
+            color: #4b5563;
+        }
+        .switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #10b981;
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        .task.hidden {
+            display: none;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <h1>📊 模型推理服务工作看板</h1>
+                <div class="header-date">📅 2026-04-19 12:39:55</div>
+            </div>
+            
+            <div class="progress-section">
+                <div class="progress-label">
+                    <span>整体进度</span>
+                    <span>12/32 已完成</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 37%">37%</div>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card completed">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">已完成</div>
+                </div>
+                <div class="stat-card progress">
+                    <div class="stat-value">6</div>
+                    <div class="stat-label">进行中</div>
+                </div>
+                <div class="stat-card pending">
+                    <div class="stat-value">14</div>
+                    <div class="stat-label">未启动</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-value">1</div>
+                    <div class="stat-label">需关注</div>
+                </div>
+            </div>
+            
+            <div class="warnings" style="display:block">
+                <h3>⚠️ 日期提醒</h3>
+                <div class="warning-item"><span class="warning-badge">2天后到期</span><span>32B 以下参数模型在海光 BW100 显卡上的性能测试</span><span style="color:#6b7280">(四、不同参数模型在海光 BW100上性能测试)</span></div>
+            </div>
+            
+            <div class="filter-control">
+                <label class="switch">
+                    <input type="checkbox" id="hideCompleted" onchange="toggleCompleted()">
+                    <span class="slider"></span>
+                </label>
+                <span class="filter-label">隐藏已完成任务</span>
+            </div>
+        </div>
+        
+        <div class="kanban">
+
+            <div class="category">
+                <div class="category-header">
+                    <div class="category-title">一、新模型在华为显卡上部署验证</div>
+                    <div class="category-progress">
+                        <span>2/5</span>
+                        <div class="category-progress-bar">
+                            <div class="category-progress-fill" style="width: 40%"></div>
+                        </div>
+                        <span>40%</span>
+                    </div>
+                </div>
+                <div class="tasks">
+
+                    <div class="task completed">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">001</span> MiniMax-M2.5 在华为显卡上部署</div>
+                            <div class="task-status completed">已完成</div>
+                        </div>
+                        <div class="task-dates">📅 03/23 - 03/24</div>
+                        
+                        <div class="task-note">能够双机部署</div>
+                    </div>
+
+                    <div class="task completed">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">002</span> MiniMax-M2.5 在华为显卡上验证思考、工具调用功能</div>
+                            <div class="task-status completed">已完成</div>
+                        </div>
+                        <div class="task-dates">📅 未设置 - 未设置</div>
+                        
+                        <div class="task-note">华为卡做多机部署测试，引入单排队已满，暂时无法进行</div>
+                    </div>
+
+                    <div class="task pending">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">003</span> Kimi-k2.5在华为显卡上部署</div>
+                            <div class="task-status pending">未启动</div>
+                        </div>
+                        <div class="task-dates">📅 未设置 - 未设置</div>
+                        
+                        <div class="task-note">华为卡做多机部署测试，引入单排队已满，暂时无法进行</div>
+                    </div>
+
+                    <div class="task pending">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">004</span> Kimi-k2.5在华为显卡上验证思考、工具调用功能</div>
+                            <div class="task-status pending">未启动</div>
+                        </div>
+                        <div class="task-dates">📅 未设置 - 未设置</div>
+                        
+                        
+                    </div>
+
+                    <div class="task pending">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">005</span> 设计新模型在华为显卡上的benchmark方案</div>
+                            <div class="task-status pending">未启动</div>
+                        </div>
+                        <div class="task-dates">📅 未设置 - 未设置</div>
+                        
+                        
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header">
+                    <div class="category-title">二、新模型在海光显卡上部署验证</div>
+                    <div class="category-progress">
+                        <span>2/4</span>
+                        <div class="category-progress-bar">
+                            <div class="category-progress-fill" style="width: 50%"></div>
+                        </div>
+                        <span>50%</span>
+                    </div>
+                </div>
+                <div class="tasks">
+
+                    <div class="task completed">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">006</span> paddleocr-vl-1.5 在海光显卡上部署</div>
+                            <div class="task-status completed">已完成</div>
+                        </div>
+                        <div class="task-dates">📅 03/25 - 04/03</div>
+                        
+                        
+                    </div>
+
+                    <div class="task pending">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">007</span> paddleocr-vl-1.5 在海光显卡上验证OCR推理效果</div>
+                            <div class="task-status pending">未启动</div>
+                        </div>
+                        <div class="task-dates">📅 未设置 - 未设置</div>
+                        
+                        
+                    </div>
+
+                    <div class="task completed">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">008</span> Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled及其V2版本引入</div>
+                            <div class="task-status completed">已完成</div>
+                        </div>
+                        <div class="task-dates">📅 03/25 - 04/03</div>
+                        
+                        <div class="task-note">引入申请提单</div>
+                    </div>
+
+                    <div class="task pending">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">009</span> Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled在海光显卡上部署</div>
+                            <div class="task-status pending">未启动</div>
+                        </div>
+                        <div class="task-dates">📅 未设置 - 未设置</div>
+                        
+                        
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header">
+                    <div class="category-title">三、Cosyvoice2 语音模型华为显卡方案</div>
+                    <div class="category-progress">
+                        <span>2/3</span>
+                        <div class="category-progress-bar">
+                            <div class="category-progress-fill" style="width: 66%"></div>
+                        </div>
+                        <span>66%</span>
+                    </div>
+                </div>
+                <div class="tasks">
+
+                    <div class="task completed">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">010</span> 解决 Cosyvoice 压测并发数过低的问题</div>
+                            <div class="task-status completed">已完成</div>
+                        </div>
+                        <div class="task-dates">📅 03/16 - 03/24</div>
+                        
+                        <div class="task-note">目前使用 uvicorn 框架能够通过开启多个 worker 进行并发，每一个 worker 大概占用 7000M 显存，支持并发 1。后续需验证并发下语音质量...</div>
+                    </div>
+
+                    <div class="task completed">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">011</span> 联调 Cosyvoice 的并发脚本，验证是否能够支撑</div>
+                            <div class="task-status completed">已完成</div>
+                        </div>
+                        <div class="task-dates">📅 03/25 - 03/31</div>
+                        
+                        <div class="task-note">中间华为机器用作其它测试工作</div>
+                    </div>
+
+                    <div class="task pending">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">012</span> Cosyvoice2 在中文男声下会出现混合音调的问题</div>
+                            <div class="task-status pending">未启动</div>
+                        </div>
+                        <div class="task-dates">📅 04/20 - 05/15</div>
+                        
+                        <div class="task-note">尝试使用自定义生成音色 pt 文件修复此问题。</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header">
+                    <div class="category-title">四、不同参数模型在海光 BW100上性能测试</div>
+                    <div class="category-progress">
+                        <span>1/4</span>
+                        <div class="category-progress-bar">
+                            <div class="category-progress-fill" style="width: 25%"></div>
+                        </div>
+                        <span>25%</span>
+                    </div>
+                </div>
+                <div class="tasks">
+
+                    <div class="task completed">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">013</span> 32B 以下模型在海光 BW100 显卡部署</div>
+                            <div class="task-status completed">已完成</div>
+                        </div>
+                        <div class="task-dates">📅 04/06 - 04/10</div>
+                        
+                        <div class="task-note">测试 BW100 在 32B 以下参数的模型性能；</div>
+                    </div>
+
+                    <div class="task pending">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">014</span> 32B 以上模型在海光 BW100 显卡部署</div>
+                            <div class="task-status pending">未启动</div>
+                        </div>
+                        <div class="task-dates">📅 未设置 - 未设置</div>
+                        
+                        <div class="task-note">测试 BW100 在 32B 以上参数的模型性能；</div>
+                    </div>
+
+                    <div class="task pending">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">015</span> 32B 以上参数模型在海光 BW100 显卡上的性能测试</div>
+                            <div class="task-status pending">未启动</div>
+                        </div>
+                        <div class="task-dates">📅 未设置 - 未设置</div>
+                        
+                        
+                    </div>
+
+                    <div class="task progress warning-soon">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">016</span> 32B 以下参数模型在海光 BW100 显卡上的性能测试</div>
+                            <div class="task-status progress">进行中</div>
+                        </div>
+                        <div class="task-dates">📅 04/15 - 04/21</div>
+                        <div class="date-warning">⚠️ 2天后到期</div>
+                        
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header">
+                    <div class="category-title">五、模型在海光显卡上的推理加速方案</div>
+                    <div class="category-progress">
+                        <span>1/6</span>
+                        <div class="category-progress-bar">
+                            <div class="category-progress-fill" style="width: 16%"></div>
+                        </div>
+                        <span>16%</span>
+                    </div>
+                </div>
+                <div class="tasks">
+
+                    <div class="task progress">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">017</span> 测试环境缓存优化（前缀、字符串、语义）方案测试数据获取</div>
+                            <div class="task-status progress">进行中</div>
+                        </div>
+                        <div class="task-dates">📅 03/23 - 04/30</div>
+                        
+                        <div class="task-note">测试环境开启后收集数据，并形成文档</div>
+                    </div>
+
+                    <div class="task completed">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">018</span> 设计模型LMCache加速在海光显卡上的验证方案</div>
+                            <div class="task-status completed">已完成</div>
+                        </div>
+                        <div class="task-dates">📅 04/01 - 04/10</div>
+                        
+                        <div class="task-note">同步调研SGLang等其它主流推理引擎实现方案</div>
+                    </div>
+
+                    <div class="task progress">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">019</span> 测试环境显卡上LMCache方案验证</div>
+                            <div class="task-status progress">进行中</div>
+                        </div>
+                        <div class="task-dates">📅 04/13 - 04/30</div>
+                        
+                        
+                    </div>
+
+                    <div class="task pending">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">020</span> 设计海光显卡上的 PD 分离方案</div>
+                            <div class="task-status pending">未启动</div>
+                        </div>
+                        <div class="task-dates">📅 04/01 - 04/30</div>
+                        
+                        <div class="task-note">单验证软件方案是否可用、后续硬件到位再继续做验证</div>
+                    </div>
+
+                    <div class="task pending">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">021</span> 引入海光显卡上PD分离相关的依赖</div>
+                            <div class="task-status pending">未启动</div>
+                        </div>
+                        <div class="task-dates">📅 04/01 - 04/30</div>
+                        
+                        
+                    </div>
+
+                    <div class="task pending">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">022</span> 测试环境验证海光显卡上PD分离方案效果</div>
+                            <div class="task-status pending">未启动</div>
+                        </div>
+                        <div class="task-dates">📅 未设置 - 未设置</div>
+                        
+                        
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header">
+                    <div class="category-title">六、模型在PPU上的性能验证</div>
+                    <div class="category-progress">
+                        <span>3/5</span>
+                        <div class="category-progress-bar">
+                            <div class="category-progress-fill" style="width: 60%"></div>
+                        </div>
+                        <span>60%</span>
+                    </div>
+                </div>
+                <div class="tasks">
+
+                    <div class="task completed">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">023</span> qwen3-32B和qwen3.5-35B模型在PPU显卡部署</div>
+                            <div class="task-status completed">已完成</div>
+                        </div>
+                        <div class="task-dates">📅 04/13 - 04/17</div>
+                        
+                        
+                    </div>
+
+                    <div class="task completed">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">024</span> qwen3.5-122B模型在PPU显卡部署</div>
+                            <div class="task-status completed">已完成</div>
+                        </div>
+                        <div class="task-dates">📅 04/13 - 04/17</div>
+                        
+                        
+                    </div>
+
+                    <div class="task completed">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">025</span> qwen3-tts和qwen3-asr模型在PPU显卡部署</div>
+                            <div class="task-status completed">已完成</div>
+                        </div>
+                        <div class="task-dates">📅 04/13 - 04/17</div>
+                        
+                        
+                    </div>
+
+                    <div class="task progress">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">026</span> 32B参数模型在PPU上进行性能压测</div>
+                            <div class="task-status progress">进行中</div>
+                        </div>
+                        <div class="task-dates">📅 04/20 - 04/24</div>
+                        
+                        
+                    </div>
+
+                    <div class="task progress">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">027</span> 高参数模型在PPU上进行性能压测</div>
+                            <div class="task-status progress">进行中</div>
+                        </div>
+                        <div class="task-dates">📅 04/20 - 04/24</div>
+                        
+                        
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header">
+                    <div class="category-title">七、技术支撑</div>
+                    <div class="category-progress">
+                        <span>1/2</span>
+                        <div class="category-progress-bar">
+                            <div class="category-progress-fill" style="width: 50%"></div>
+                        </div>
+                        <span>50%</span>
+                    </div>
+                </div>
+                <div class="tasks">
+
+                    <div class="task completed">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">028</span> 制作vllm0.11.0推理引擎镜像，增加可观测组件</div>
+                            <div class="task-status completed">已完成</div>
+                        </div>
+                        <div class="task-dates">📅 03/25 - 03/31</div>
+                        
+                        <div class="task-note">需求方：可观测；</div>
+                    </div>
+
+                    <div class="task progress">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">029</span> 开测环境模型更换推理引擎vllm0.11.0-opentelemetry</div>
+                            <div class="task-status progress">进行中</div>
+                        </div>
+                        <div class="task-dates">📅 04/01 - 05/15</div>
+                        
+                        <div class="task-note">需求方：可观测；</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header">
+                    <div class="category-title">八、外部</div>
+                    <div class="category-progress">
+                        <span>0/3</span>
+                        <div class="category-progress-bar">
+                            <div class="category-progress-fill" style="width: 0%"></div>
+                        </div>
+                        <span>0%</span>
+                    </div>
+                </div>
+                <div class="tasks">
+
+                    <div class="task pending">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">030</span> AI模型网关中AI模型供应商对Reranker模型的支持</div>
+                            <div class="task-status pending">未启动</div>
+                        </div>
+                        <div class="task-dates">📅 04/01 - 05/29</div>
+                        
+                        
+                    </div>
+
+                    <div class="task pending">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">031</span> AI模型网关模型接入模型服务流程</div>
+                            <div class="task-status pending">未启动</div>
+                        </div>
+                        <div class="task-dates">📅 04/01 - 05/29</div>
+                        
+                        
+                    </div>
+
+                    <div class="task pending">
+                        <div class="task-header">
+                            <div class="task-name">#<span class="task-row">032</span> AI模型网关升级流程</div>
+                            <div class="task-status pending">未启动</div>
+                        </div>
+                        <div class="task-dates">📅 04/01 - 05/29</div>
+                        
+                        
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="milestones-section">
+            <h2>🎯 里程碑</h2>
+            <div class="milestones-grid">
+
+                <div class="milestone completed">
+                    <div class="milestone-header">
+                        <div class="milestone-name">#<span class="task-row">033</span> 完成MiniMax-M2.5在华为显卡上的部署</div>
+                        <div class="task-status completed">已完成</div>
+                    </div>
+                    <div class="milestone-dates">📅 03/23 - 04/03</div>
+                    <div class="task-note">📦 MiniMax-M2.5部署文档</div>
+                </div>
+
+                <div class="milestone ">
+                    <div class="milestone-header">
+                        <div class="milestone-name">#<span class="task-row">034</span> 完成Kimi-k2.5在华为显卡上的部署</div>
+                        <div class="task-status pending">未启动</div>
+                    </div>
+                    <div class="milestone-dates">📅 04/01 - 04/15</div>
+                    <div class="task-note">📦 Kimi-k2.5部署文档</div>
+                </div>
+
+                <div class="milestone ">
+                    <div class="milestone-header">
+                        <div class="milestone-name">#<span class="task-row">035</span> 完成不同参数量模型在海光BW100显卡上的性能测试</div>
+                        <div class="task-status pending">进行中</div>
+                    </div>
+                    <div class="milestone-dates">📅 04/01 - 04/30</div>
+                    <div class="task-note">📦 性能测试文档</div>
+                </div>
+
+                <div class="milestone ">
+                    <div class="milestone-header">
+                        <div class="milestone-name">#<span class="task-row">036</span> 完成海光的LMCache方案验证</div>
+                        <div class="task-status pending">进行中</div>
+                    </div>
+                    <div class="milestone-dates">📅 04/01 - 04/30</div>
+                    <div class="task-note">📦 性能对比图</div>
+                </div>
+
+                <div class="milestone ">
+                    <div class="milestone-header">
+                        <div class="milestone-name">#<span class="task-row">037</span> 完成海光的PD分离方案验证（单纯软件层面）</div>
+                        <div class="task-status pending">未启动</div>
+                    </div>
+                    <div class="milestone-dates">📅 05/01 - 05/30</div>
+                    <div class="task-note">📦 性能对比图</div>
+                </div>
+
+                <div class="milestone ">
+                    <div class="milestone-header">
+                        <div class="milestone-name">#<span class="task-row">038</span> 完成ASR/TTS模型在华为显卡上的适配工作</div>
+                        <div class="task-status pending">进行中</div>
+                    </div>
+                    <div class="milestone-dates">📅 01/28 - 10/31</div>
+                    <div class="task-note">📦 TTS/ASR部署手册、TTS/ASR性能测试文档</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="footer">
+            📋 数据来源: 模型推理服务.xlsx | 手动刷新页面查看最新数据
+        </div>
+    </div>
+
+    <script>
+        function toggleCompleted() {
+            const hide = document.getElementById('hideCompleted').checked;
+            document.querySelectorAll('.task.completed').forEach(el => {
+                el.classList.toggle('hidden', hide);
+            });
+        }
+    </script>
+
+</body>
+</html>
