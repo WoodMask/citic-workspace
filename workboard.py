@@ -102,14 +102,30 @@ def read_excel_data():
     
     return categories, milestones
 
-def calculate_date_status(end_date, task_status):
+def calculate_date_status(start_date, end_date, task_status):
+    today = date.today()
+    
     if task_status == '已完成':
         return 'normal', ''
+    
+    if start_date and task_status == '未启动':
+        if isinstance(start_date, datetime):
+            start = start_date.date()
+        elif isinstance(start_date, date):
+            start = start_date
+        else:
+            start = None
+        
+        if start and start <= today:
+            days_passed = (today - start).days
+            if days_passed == 0:
+                return 'should_start', '今日应启动'
+            else:
+                return 'should_start', f'应启动{days_passed}天'
     
     if end_date is None:
         return 'normal', ''
     
-    today = date.today()
     if isinstance(end_date, datetime):
         end = end_date.date()
     elif isinstance(end_date, date):
@@ -257,6 +273,9 @@ CSS_STYLES = '''
             border-radius: 4px;
             font-size: 12px;
         }
+        .warning-badge.orange {
+            background: #f59e0b;
+        }
         
         .kanban {
             display: grid;
@@ -365,6 +384,10 @@ CSS_STYLES = '''
             background: #fef2f2;
         }
         .task.warning-soon {
+            border: 2px solid #f59e0b;
+            background: #fffbeb;
+        }
+        .task.should-start {
             border: 2px solid #f59e0b;
             background: #fffbeb;
         }
@@ -515,8 +538,8 @@ def generate_html(categories, milestones):
     date_warnings = []
     for c in categories:
         for t in c['tasks']:
-            date_status, date_msg = calculate_date_status(t['end_date'], t['status'])
-            if date_status in ['overdue', 'warning', 'soon']:
+            date_status, date_msg = calculate_date_status(t['start_date'], t['end_date'], t['status'])
+            if date_status in ['overdue', 'warning', 'soon', 'should_start']:
                 date_warnings.append({
                     'task': t['name'],
                     'category': c['name'],
@@ -525,7 +548,7 @@ def generate_html(categories, milestones):
                 })
     
     warnings_display = 'block' if date_warnings else 'none'
-    warnings_html = ''.join([f'<div class="warning-item"><span class="warning-badge">{w["message"]}</span><span>{w["task"]}</span><span style="color:#6b7280">({w["category"]})</span></div>' for w in date_warnings[:5]])
+    warnings_html = ''.join([f'<div class="warning-item"><span class="warning-badge{" orange" if w["status"] == "should_start" else ""}">{w["message"]}</span><span>{w["task"]}</span><span style="color:#6b7280">({w["category"]})</span></div>' for w in date_warnings[:5]])
     
     html = f'''<!DOCTYPE html>
 <html lang="zh-CN">
@@ -629,16 +652,18 @@ def generate_html(categories, milestones):
             elif task['status'] == '已完成':
                 status_class = 'completed'
             
-            date_status, date_msg = calculate_date_status(task['end_date'], task['status'])
+            date_status, date_msg = calculate_date_status(task['start_date'], task['end_date'], task['status'])
             task_class = f'task {status_class}'
             if date_status == 'overdue':
                 task_class += ' overdue'
             elif date_status in ['warning', 'soon']:
                 task_class += ' warning-soon'
+            elif date_status == 'should_start':
+                task_class += ' should-start'
             
             date_range = f"{format_date(task['start_date'])} - {format_date(task['end_date'])}"
             
-            date_warning_html = f'<div class="date-warning">⚠️ {date_msg}</div>' if date_status in ['overdue', 'warning'] else ''
+            date_warning_html = f'<div class="date-warning">⚠️ {date_msg}</div>' if date_status in ['overdue', 'warning', 'should_start'] else ''
             note_html = f'<div class="task-note">{task["note"][:80]}{"..." if len(str(task["note"])) > 80 else ""}</div>' if task['note'] else ''
             
             html += f'''

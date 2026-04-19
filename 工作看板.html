@@ -125,6 +125,9 @@
             border-radius: 4px;
             font-size: 12px;
         }
+        .warning-badge.orange {
+            background: #f59e0b;
+        }
         
         .kanban {
             display: grid;
@@ -233,6 +236,10 @@
             background: #fef2f2;
         }
         .task.warning-soon {
+            border: 2px solid #f59e0b;
+            background: #fffbeb;
+        }
+        .task.should-start {
             border: 2px solid #f59e0b;
             background: #fffbeb;
         }
@@ -352,7 +359,7 @@
         <div class="header">
             <div class="header-top">
                 <h1>📊 模型推理服务工作看板</h1>
-                <div class="header-date">📅 2026-04-19 13:21:54</div>
+                <div class="header-date">📅 2026-04-19 13:34:33</div>
             </div>
             
             <div class="progress-section">
@@ -379,14 +386,14 @@
                     <div class="stat-label">未启动</div>
                 </div>
                 <div class="stat-card warning">
-                    <div class="stat-value">1</div>
+                    <div class="stat-value">6</div>
                     <div class="stat-label">需关注</div>
                 </div>
             </div>
             
             <div class="warnings" style="display:block">
                 <h3>⚠️ 日期提醒</h3>
-                <div class="warning-item"><span class="warning-badge">2天后到期</span><span>32B 以下参数模型在海光 BW100 显卡上的性能测试</span><span style="color:#6b7280">(四、不同参数模型在海光 BW100上性能测试)</span></div>
+                <div class="warning-item"><span class="warning-badge">2天后到期</span><span>32B 以下参数模型在海光 BW100 显卡上的性能测试</span><span style="color:#6b7280">(四、不同参数模型在海光 BW100上性能测试)</span></div><div class="warning-item"><span class="warning-badge orange">应启动18天</span><span>设计海光显卡上的 PD 分离方案</span><span style="color:#6b7280">(五、模型在海光显卡上的推理加速方案)</span></div><div class="warning-item"><span class="warning-badge orange">应启动18天</span><span>引入海光显卡上PD分离相关的依赖</span><span style="color:#6b7280">(五、模型在海光显卡上的推理加速方案)</span></div><div class="warning-item"><span class="warning-badge orange">应启动18天</span><span>AI模型网关中AI模型供应商对Reranker模型的支持</span><span style="color:#6b7280">(八、外部)</span></div><div class="warning-item"><span class="warning-badge orange">应启动18天</span><span>AI模型网关模型接入模型服务流程</span><span style="color:#6b7280">(八、外部)</span></div>
             </div>
             
             <div class="filter-control">
@@ -687,23 +694,23 @@
                         
                     </div>
 
-                    <div class="task pending">
+                    <div class="task pending should-start">
                         <div class="task-header">
                             <div class="task-name">#<span class="task-row">020</span> 设计海光显卡上的 PD 分离方案</div>
                             <div class="task-status pending">未启动</div>
                         </div>
                         <div class="task-dates">📅 04/01 - 04/30</div>
-                        
+                        <div class="date-warning">⚠️ 应启动18天</div>
                         <div class="task-note">单验证软件方案是否可用、后续硬件到位再继续做验证</div>
                     </div>
 
-                    <div class="task pending">
+                    <div class="task pending should-start">
                         <div class="task-header">
                             <div class="task-name">#<span class="task-row">021</span> 引入海光显卡上PD分离相关的依赖</div>
                             <div class="task-status pending">未启动</div>
                         </div>
                         <div class="task-dates">📅 04/01 - 04/30</div>
-                        
+                        <div class="date-warning">⚠️ 应启动18天</div>
                         
                     </div>
 
@@ -875,33 +882,33 @@
                 </div>
                 <div class="tasks">
 
-                    <div class="task pending">
+                    <div class="task pending should-start">
                         <div class="task-header">
                             <div class="task-name">#<span class="task-row">030</span> AI模型网关中AI模型供应商对Reranker模型的支持</div>
                             <div class="task-status pending">未启动</div>
                         </div>
                         <div class="task-dates">📅 04/01 - 05/29</div>
-                        
+                        <div class="date-warning">⚠️ 应启动18天</div>
                         
                     </div>
 
-                    <div class="task pending">
+                    <div class="task pending should-start">
                         <div class="task-header">
                             <div class="task-name">#<span class="task-row">031</span> AI模型网关模型接入模型服务流程</div>
                             <div class="task-status pending">未启动</div>
                         </div>
                         <div class="task-dates">📅 04/01 - 05/29</div>
-                        
+                        <div class="date-warning">⚠️ 应启动18天</div>
                         
                     </div>
 
-                    <div class="task pending">
+                    <div class="task pending should-start">
                         <div class="task-header">
                             <div class="task-name">#<span class="task-row">032</span> AI模型网关升级流程</div>
                             <div class="task-status pending">未启动</div>
                         </div>
                         <div class="task-dates">📅 04/01 - 05/29</div>
-                        
+                        <div class="date-warning">⚠️ 应启动18天</div>
                         
                     </div>
 

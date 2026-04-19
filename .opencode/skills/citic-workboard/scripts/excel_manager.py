@@ -579,6 +579,7 @@ def get_overdue_tasks(days_threshold: int = 7) -> List[Dict[str, Any]]:
         task_id = ws.cell(row=row_idx, column=1).value
         task_name = ws.cell(row=row_idx, column=2).value
         status = ws.cell(row=row_idx, column=3).value
+        start_date_cell = ws.cell(row=row_idx, column=4).value
         end_date_cell = ws.cell(row=row_idx, column=5).value
         
         if task_name:
@@ -586,45 +587,67 @@ def get_overdue_tasks(days_threshold: int = 7) -> List[Dict[str, Any]]:
             
             if task_str.startswith(('一、', '二、', '三、', '四、', '五、', '六、', '七、', '八、', '里程碑')):
                 current_category = task_str
-            elif status and str(status).strip() in ['已完成', '进行中', '未启动'] and end_date_cell:
+            elif status and str(status).strip() in ['已完成', '进行中', '未启动']:
                 status_str = str(status).strip()
                 
                 if status_str == '已完成':
                     continue
                 
-                end_date = None
-                if isinstance(end_date_cell, datetime):
-                    end_date = end_date_cell.date()
-                elif isinstance(end_date_cell, date):
-                    end_date = end_date_cell
+                start_date = None
+                if isinstance(start_date_cell, datetime):
+                    start_date = start_date_cell.date()
+                elif isinstance(start_date_cell, date):
+                    start_date = start_date_cell
                 
-                if end_date:
-                    days_diff = (end_date - today).days
+                if status_str == '未启动' and start_date and start_date <= today:
+                    days_passed = (today - start_date).days
+                    msg = f"应启动{days_passed}天" if days_passed > 0 else "今日应启动"
+                    overdue_tasks.append({
+                        'row': row_idx,
+                        'id': str(task_id).strip() if task_id else '',
+                        'name': task_str,
+                        'status': status_str,
+                        'start_date': start_date,
+                        'days_passed': days_passed,
+                        'alert_type': 'should_start',
+                        'message': msg,
+                        'category': current_category
+                    })
+                
+                if end_date_cell:
+                    end_date = None
+                    if isinstance(end_date_cell, datetime):
+                        end_date = end_date_cell.date()
+                    elif isinstance(end_date_cell, date):
+                        end_date = end_date_cell
                     
-                    if days_diff < 0:
-                        overdue_tasks.append({
-                            'row': row_idx,
-                            'id': str(task_id).strip() if task_id else '',
-                            'name': task_str,
-                            'status': status_str,
-                            'end_date': end_date,
-                            'days_diff': days_diff,
-                            'alert_type': 'overdue',
-                            'message': f"Overdue {abs(days_diff)} days",
-                            'category': current_category
-                        })
-                    elif days_diff <= days_threshold and status_str == '进行中':
-                        overdue_tasks.append({
-                            'row': row_idx,
-                            'id': str(task_id).strip() if task_id else '',
-                            'name': task_str,
-                            'status': status_str,
-                            'end_date': end_date,
-                            'days_diff': days_diff,
-                            'alert_type': 'due_soon',
-                            'message': f"Due in {days_diff} days",
-                            'category': current_category
-                        })
+                    if end_date:
+                        days_diff = (end_date - today).days
+                        
+                        if days_diff < 0:
+                            overdue_tasks.append({
+                                'row': row_idx,
+                                'id': str(task_id).strip() if task_id else '',
+                                'name': task_str,
+                                'status': status_str,
+                                'end_date': end_date,
+                                'days_diff': days_diff,
+                                'alert_type': 'overdue',
+                                'message': f"超期{abs(days_diff)}天",
+                                'category': current_category
+                            })
+                        elif days_diff <= days_threshold and status_str == '进行中':
+                            overdue_tasks.append({
+                                'row': row_idx,
+                                'id': str(task_id).strip() if task_id else '',
+                                'name': task_str,
+                                'status': status_str,
+                                'end_date': end_date,
+                                'days_diff': days_diff,
+                                'alert_type': 'due_soon',
+                                'message': f"{days_diff}天后到期",
+                                'category': current_category
+                            })
     
     wb.close()
     return overdue_tasks
