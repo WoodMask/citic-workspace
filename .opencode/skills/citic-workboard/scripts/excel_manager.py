@@ -792,4 +792,4 @@ if __name__ == '__main__':
     if overdue:
         print("\n[ALERT] Tasks need attention:")
         for t in overdue:
-            print(f"   #{t['row']} {t['name']} - {t['message']}")
+            print(f"   #{t['id']} {t['name']} - {t['message']}")
