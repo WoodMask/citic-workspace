@@ -431,7 +431,7 @@ CSS_STYLES = '''
         .filter-control {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
             margin-top: 16px;
             padding-top: 16px;
             border-top: 1px solid #e5e7eb;
@@ -439,45 +439,40 @@ CSS_STYLES = '''
         .filter-label {
             font-size: 14px;
             color: #4b5563;
+            font-weight: 500;
         }
-        .switch {
-            position: relative;
-            width: 44px;
-            height: 24px;
+        .filter-checkboxes {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.3s;
-            border-radius: 24px;
         }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: 0.3s;
-            border-radius: 50%;
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #3b82f6;
         }
-        input:checked + .slider {
-            background-color: #10b981;
+        .checkbox-item.completed input[type="checkbox"] {
+            accent-color: #10b981;
         }
-        input:checked + .slider:before {
-            transform: translateX(20px);
+        .checkbox-item.pending input[type="checkbox"] {
+            accent-color: #6b7280;
         }
+        .checkbox-item label {
+            font-size: 14px;
+            color: #4b5563;
+            cursor: pointer;
+            user-select: none;
+        }
+        .checkbox-item.completed label { color: #10b981; }
+        .checkbox-item.progress label { color: #3b82f6; }
+        .checkbox-item.pending label { color: #6b7280; }
         .task.hidden {
             display: none;
         }
@@ -486,12 +481,27 @@ CSS_STYLES = '''
 
 JS_CODE = '''
     <script>
-        function toggleCompleted() {
-            const hide = document.getElementById('hideCompleted').checked;
-            document.querySelectorAll('.task.completed').forEach(el => {
-                el.classList.toggle('hidden', hide);
+        function filterTasks() {
+            const showCompleted = document.getElementById('showCompleted').checked;
+            const showProgress = document.getElementById('showProgress').checked;
+            const showPending = document.getElementById('showPending').checked;
+            
+            document.querySelectorAll('.task').forEach(el => {
+                const isCompleted = el.classList.contains('completed');
+                const isProgress = el.classList.contains('progress');
+                const isPending = el.classList.contains('pending');
+                
+                const shouldShow = (isCompleted && showCompleted) || 
+                                   (isProgress && showProgress) || 
+                                   (isPending && showPending);
+                
+                el.classList.toggle('hidden', !shouldShow);
             });
         }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            filterTasks();
+        });
     </script>
 '''
 
@@ -568,11 +578,21 @@ def generate_html(categories, milestones):
             </div>
             
             <div class="filter-control">
-                <label class="switch">
-                    <input type="checkbox" id="hideCompleted" onchange="toggleCompleted()">
-                    <span class="slider"></span>
-                </label>
-                <span class="filter-label">隐藏已完成任务</span>
+                <span class="filter-label">显示状态：</span>
+                <div class="filter-checkboxes">
+                    <div class="checkbox-item progress">
+                        <input type="checkbox" id="showProgress" checked onchange="filterTasks()">
+                        <label for="showProgress">进行中</label>
+                    </div>
+                    <div class="checkbox-item completed">
+                        <input type="checkbox" id="showCompleted" onchange="filterTasks()">
+                        <label for="showCompleted">已完成</label>
+                    </div>
+                    <div class="checkbox-item pending">
+                        <input type="checkbox" id="showPending" onchange="filterTasks()">
+                        <label for="showPending">未启动</label>
+                    </div>
+                </div>
             </div>
         </div>
         
