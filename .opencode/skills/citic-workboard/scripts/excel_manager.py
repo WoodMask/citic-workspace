@@ -214,6 +214,11 @@ def get_task_by_id(task_id: str) -> Optional[Dict[str, Any]]:
     ws = wb.active
     
     task_id = str(task_id).strip().lstrip('#')
+    try:
+        task_id = f'{int(task_id):03d}'
+    except ValueError:
+        wb.close()
+        return None
     
     for row_idx in range(2, ws.max_row + 1):
         cell_id = ws.cell(row=row_idx, column=1).value
@@ -232,6 +237,11 @@ def find_row_by_id(task_id: str) -> Optional[int]:
     ws = wb.active
     
     task_id = str(task_id).strip().lstrip('#')
+    try:
+        task_id = f'{int(task_id):03d}'
+    except ValueError:
+        wb.close()
+        return None
     
     for row_idx in range(2, ws.max_row + 1):
         cell_id = ws.cell(row=row_idx, column=1).value
