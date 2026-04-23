@@ -1,0 +1,19 @@
+{
+  "description": "评估数据集存储目录",
+  "format": {
+    "file_pattern": "dataset_{source}_{timestamp}.json",
+    "sources": ["synthetic", "sessiondb", "traces"],
+    "required_fields": ["id", "type", "input", "expected", "description"]
+  },
+  "usage": {
+    "read": "evolve.py",
+    "write": "dataset_generator.py"
+  },
+  "example": {
+    "id": "tc-001",
+    "type": "trigger_test",
+    "input": "digimon 进化 open-source-tech-report",
+    "expected": "skill_triggered",
+    "description": "测试触发条件识别"
+  }
+}

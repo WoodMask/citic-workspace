@@ -14,11 +14,15 @@
       "description": "编码模式：搜索+GitHub+技能创建"
     },
     "agent": {
-      "skills": ["proactive-agent", "self-improving-agent", "remembering-conversations"],
-      "description": "Agent模式：主动代理+自改进+记忆"
+      "skills": ["proactive-agent", "self-improving-agent", "remembering-conversations", "digimon"],
+      "description": "Agent模式：主动代理+自改进+记忆+技能进化"
+    },
+    "evolution": {
+      "skills": ["digimon", "skill-creator", "self-improving-agent"],
+      "description": "进化模式：技能进化+创建+自改进"
     }
   },
   "activeProfile": "default",
   "autoLoad": true,
-  "projectSkills": ["useskills", "serpapi-search", "open-source-tech-report", "send-citic-mail"]
+  "projectSkills": ["useskills", "serpapi-search", "open-source-tech-report", "send-citic-mail", "digimon"]
 }

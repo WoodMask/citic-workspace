@@ -1,0 +1,16 @@
+{
+  "description": "进化变体历史存储目录",
+  "format": {
+    "backup_pattern": "{skill_name}_backup_{timestamp}.md",
+    "variant_pattern": "{skill_name}_evolved_gen{N}.md",
+    "required_fields": ["generation", "scores", "timestamp"]
+  },
+  "usage": {
+    "read": "evolve.py (for rollback)",
+    "write": "SkillEvolver._apply_variant()"
+  },
+  "retention": {
+    "max_backups": 10,
+    "cleanup_policy": "delete oldest when exceeding max_backups"
+  }
+}

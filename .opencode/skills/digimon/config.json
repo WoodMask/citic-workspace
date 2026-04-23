@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "evolution": {
+    "iterations": 10,
+    "eval_source": "sessiondb",
+    "target": "skill",
+    "constraints": {
+      "max_size_kb": 15,
+      "require_tests": true,
+      "semantic_check": true,
+      "preserve_structure": true,
+      "backup_before_apply": true
+    },
+    "output": {
+      "variants_dir": "memory/variants",
+      "reports_dir": "memory/evaluations",
+      "traces_dir": "memory/traces"
+    }
+  },
+  "gepa": {
+    "mutation_rate": 0.3,
+    "reflection_enabled": true,
+    "pareto_objectives": ["accuracy", "clarity", "efficiency", "completeness"],
+    "selection_strategy": "pareto_front",
+    "max_variants_per_gen": 5
+  },
+  "llm": {
+    "provider": "anthropic",
+    "model": "claude-3.5-sonnet",
+    "temperature": 0.7,
+    "max_tokens": 4000
+  },
+  "alternative_llm": {
+    "provider": "openai",
+    "model": "gpt-4o",
+    "temperature": 0.7,
+    "max_tokens": 4000
+  },
+  "skills_path": ".opencode/skills",
+  "sessiondb_path": null,
+  "hooks": {
+    "before_evolve": [],
+    "after_evolve": ["create_pr_if_improved"],
+    "on_constraint_fail": ["log_failure", "notify_user"]
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "memory/evolution_log.json"
+  }
+}

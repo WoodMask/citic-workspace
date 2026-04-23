@@ -1,0 +1,19 @@
+{
+  "description": "执行轨迹存储目录",
+  "format": {
+    "file_pattern": "{skill_name}_{timestamp}.json",
+    "required_fields": ["skill_name", "input", "output", "status", "timestamp"],
+    "optional_fields": ["error", "duration"]
+  },
+  "usage": {
+    "read": "trace_analyzer.py",
+    "write": "TraceCollector.collect()"
+  },
+  "example": {
+    "skill_name": "open-source-tech-report",
+    "input": "生成GLM-5的评估报告",
+    "output": "报告生成成功",
+    "status": "success",
+    "timestamp": "2026-04-23T10:30:00Z"
+  }
+}

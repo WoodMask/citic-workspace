@@ -1,0 +1,19 @@
+{
+  "description": "语义模式库存储目录",
+  "purpose": "存储提取的可复用语义模式",
+  "format": {
+    "file_pattern": "patterns_{category}.json",
+    "categories": ["trigger", "workflow", "constraint", "example"],
+    "required_fields": ["pattern_id", "pattern", "confidence", "applications"]
+  },
+  "usage": {
+    "read": "self-improving-agent",
+    "write": "Pattern extraction during evolution"
+  },
+  "example": {
+    "pattern_id": "pat-001",
+    "pattern": "触发条件使用关键词列表",
+    "confidence": 0.9,
+    "applications": 5
+  }
+}
