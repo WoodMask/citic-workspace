@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 
 try:
-    from gepa import GEPAOptimizer as RealGEPAOptimizer
+    import gepa
     GEPA_AVAILABLE = True
 except ImportError:
     GEPA_AVAILABLE = False
@@ -263,47 +263,9 @@ class GEPAOptimizer:
         test_cases: List[Dict[str, Any]],
         iterations: int
     ) -> Tuple[str, List[Dict[str, Any]]]:
-        """使用真实 GEPA 优化。"""
-        optimizer = RealGEPAOptimizer(
-            mutation_rate=self.mutation_rate,
-            objectives=self.objectives
-        )
-        
-        history = []
-        current_best = original
-        
-        for i in range(iterations):
-            # GEPA 迭代
-            variants = optimizer.generate_variants(current_best, self.max_variants_per_gen)
-            
-            # 评估
-            evaluated = []
-            for variant in variants:
-                # 使用 GEPA 内置评估
-                score = optimizer.evaluate(variant, test_cases)
-                evaluated.append({
-                    'content': variant,
-                    'scores': score,
-                    'generation': i + 1
-                })
-            
-            # Pareto 选择
-            selected = optimizer.pareto_select(evaluated)
-            history.extend(selected)
-            
-            if selected:
-                current_best = selected[0]['content']
-            
-            # 反思
-            if self.reflection_enabled:
-                improved, insights = self.reflection.reflect(
-                    evaluated,
-                    current_best
-                )
-                if insights:
-                    print(f"Gen {i+1} reflections: {insights}")
-        
-        return current_best, history
+        """使用 GEPA 优化（当前使用 fallback 策略）。"""
+        # GEPA API 与预期不同，暂时使用 fallback 策略
+        return self._optimize_fallback(original, test_cases, iterations, None)
     
     def _optimize_fallback(
         self,

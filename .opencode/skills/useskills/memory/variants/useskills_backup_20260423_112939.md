@@ -1,4 +1,3 @@
-<!-- Digimon Evolution: 2026-04-23 | gen:1 -->
 ---
 name: useskills
 description: |

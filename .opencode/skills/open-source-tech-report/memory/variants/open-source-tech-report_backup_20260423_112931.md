@@ -1,4 +1,3 @@
-<!-- Digimon Evolution: 2026-04-23 | gen:1 -->
 # Skill: open-source-tech-report
 
 根据卡中心开源技术引入风险与技术评估报告模板，生成指定开源软件/技术的评估报告文档（.docx格式）。

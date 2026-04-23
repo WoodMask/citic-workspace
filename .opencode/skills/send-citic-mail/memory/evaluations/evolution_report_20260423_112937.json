@@ -1,0 +1,60 @@
+{
+  "status": "completed",
+  "skill_name": "send-citic-mail",
+  "evolution_date": "2026-04-23T11:29:37.665125",
+  "iterations": 8,
+  "eval_source": "synthetic",
+  "original": {
+    "size_kb": 1.7470703125,
+    "sections_count": 11,
+    "examples_count": 3
+  },
+  "best_variant": {
+    "generation": 1,
+    "scores": {
+      "accuracy": 0.7,
+      "clarity": 0.9,
+      "efficiency": 0.75,
+      "completeness": 0.3333333333333333,
+      "constraint_pass": true,
+      "constraint_details": [
+        {
+          "constraint": "max_size_kb",
+          "passed": true,
+          "value": 1.79296875,
+          "limit": 15
+        },
+        {
+          "constraint": "preserve_structure",
+          "passed": true,
+          "original_sections": 11,
+          "variant_sections": 11
+        },
+        {
+          "constraint": "semantic_check",
+          "passed": true,
+          "description": "语义一致性检查"
+        }
+      ]
+    },
+    "total_score": 0.6683333333333333
+  },
+  "total_variants_generated": 8,
+  "valid_variants": 8,
+  "apply_result": {
+    "applied": false,
+    "backup_path": ".opencode\\skills\\send-citic-mail\\memory\\variants\\send-citic-mail_backup_20260423_112937.md",
+    "variant_path": ".opencode\\skills\\send-citic-mail\\memory\\variants\\send-citic-mail_evolved_gen1.md",
+    "note": "Variant saved but not auto-applied. User should review and approve."
+  },
+  "improvements": [
+    "Content expanded by 47 bytes",
+    "Score improved from baseline to 0.67"
+  ],
+  "next_steps": [
+    "Review the evolved variant in memory/variants/",
+    "Test the variant with actual use cases",
+    "Approve and apply to main SKILL.md if satisfied",
+    "Create PR for repository if applicable"
+  ]
+}

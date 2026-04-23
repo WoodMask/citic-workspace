@@ -1,4 +1,3 @@
-<!-- Digimon Evolution: 2026-04-23 | gen:1 -->
 # Skill: send-citic-mail
 
 发送邮件到指定公司邮箱。支持发送附件文件和正文内容。
